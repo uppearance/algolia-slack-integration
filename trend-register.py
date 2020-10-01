@@ -8,8 +8,10 @@ trending keyword를 등록해주는 workflow 완성 - 코드는 backend 서버�
 """
 import os
 
+import requests
 from algoliasearch.search_client import SearchClient
-from flask import Flask, abort, jsonify, request
+from flask import Flask, abort, request
+from zappa.asynchronous import task
 
 app = Flask(__name__)
 
@@ -88,15 +90,8 @@ def format_attachments_for(query, video_count, product_count):
     return attachments
 
 
-@app.route("/trend-register", methods=["POST"])
-def trend_register():
-    query = request.form.get("text")
-    if not query:
-        abort(400)
-
-    if not is_request_valid(request):
-        abort(400)
-
+@task
+def get_algolia_result(response_url, query):
     res = client.multiple_queries(
         [
             {"indexName": os.getenv("ALGOLIA_PRODUCT_INDEX_NAME"), "query": query},
@@ -140,8 +135,23 @@ def trend_register():
     )
     attachments = format_attachments_for(query, video_count, product_count)
 
-    return jsonify(
-        response_type="in_channel",
-        attachments=attachments,
-        blocks=blocks,
-    )
+    data = {"response_type": "in_channel", "attachments": attachments, "blocks": blocks}
+
+    requests.post(response_url, json=data)
+
+
+@app.route("/trend-register", methods=["POST"])
+def trend_register():
+    query = request.form.get("text")
+    if not query:
+        abort(400)
+
+    if not is_request_valid(request):
+        abort(400)
+
+    # "in channel" slash command must receive a response in 3 seconds
+    # so handle the task asynchronously
+    get_algolia_result(request.form["response_url"], query)
+
+    # return empty response so it takes less than 3 seconds
+    return ("", 204)
