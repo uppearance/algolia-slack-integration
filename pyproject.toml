@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "trend-register"
+version = "0.1.0"
+description = "Registers trending keywords to django server, after checking on algolia index. Algolia-Slack-Django integration"
+authors = ["Steve <steve@uppearance.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+algoliasearch = "*"
+flask = "*"
+zappa = "*"
+
+[tool.poetry.dev-dependencies]
+black = "^19.10b0"
+flake8 = "*"
+flake8-isort = "*"
+ipdb = "*"
+ipython = "*"
+pre-commit = "*"
+pylint-django = "*"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

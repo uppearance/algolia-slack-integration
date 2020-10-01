@@ -1,0 +1,68 @@
+default_language_version:
+  python: python3.8
+
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v3.2.0
+  hooks:
+    - id: check-docstring-first
+    - id: check-merge-conflict
+    - id: check-json
+    - id: check-yaml
+    - id: debug-statements
+    - id: detect-aws-credentials
+    - id: detect-private-key
+    - id: end-of-file-fixer
+    - id: pretty-format-json
+      args:
+      - --autofix
+      exclude: Pipfile.lock
+    - id: trailing-whitespace
+
+- repo: https://github.com/ambv/black
+  rev: 20.8b1
+  hooks:
+  - id: black
+
+- repo: https://github.com/pre-commit/pre-commit
+  rev: v2.7.1
+  hooks:
+    - id: validate_manifest
+
+- repo: https://github.com/asottile/pyupgrade
+  rev: v2.7.2
+  hooks:
+  - id: pyupgrade
+
+- repo: https://github.com/asottile/seed-isort-config
+  rev: v2.2.0
+  hooks:
+  - id: seed-isort-config
+
+- repo: https://github.com/pre-commit/mirrors-isort
+  rev: v5.5.4
+  hooks:
+  - id: isort
+
+- repo: https://gitlab.com/pycqa/flake8
+  rev: 3.8.3
+  hooks:
+    - id: flake8
+      args: ['--config=setup.cfg']
+      additional_dependencies: [flake8-isort]
+
+- repo: https://github.com/Lucas-C/pre-commit-hooks-bandit
+  rev: v1.0.4
+  hooks:
+    - id: python-bandit-vulnerability-check
+      args: [-l, --recursive, -x, tests]
+      files: .py$
+
+- repo: local
+  hooks:
+  - id: tests
+    name: run tests
+    entry: pytest -v
+    language: system
+    types: [python]
+    stages: [push]
